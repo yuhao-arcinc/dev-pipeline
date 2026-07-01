@@ -5,6 +5,12 @@ alwaysApply: true
 
 # Project Context
 
+> Any field marked "(auto-detect ...)" must be filled by the agent on first run by
+> analyzing the repo (build files, scripts, lockfiles — e.g. package.json, Makefile,
+> pyproject.toml, go.mod, Cargo.toml). Propose the detected values, confirm once with
+> the user, then replace the marker with the real value. Do not ask the user for
+> anything you can infer yourself.
+
 - **Stack**: {{STACK}}
 - **Test command**: {{TEST_CMD}}
 - **Lint / typecheck**: {{LINT_CMD}}

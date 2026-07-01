@@ -6,9 +6,14 @@ description: End-to-end, gated development workflow — requirements interrogati
 # Dev Pipeline
 
 A looping, gated workflow. The only exit condition is the user's explicit "done"
-phrase. First read `.cursor/rules/project-context.mdc` (if present) for the stack,
-test command, lint command, and any pipeline overrides; otherwise ask for the test
-command or infer it from the repo.
+phrase.
+
+**Before Phase 1**, read `.cursor/rules/project-context.mdc` (if present) for the
+stack, test command, lint command, and any pipeline overrides. For any field marked
+"(auto-detect ...)", infer it yourself from the repo (package.json scripts, Makefile,
+pyproject.toml, go.mod, Cargo.toml, CI config, etc.), briefly confirm the detected
+values with the user, and write them back into the file. Do NOT ask the user for
+anything you can determine by reading the repo.
 
 Copy this checklist into TodoWrite and work through it in order. It is a LOOP, not
 a straight line.

@@ -55,8 +55,9 @@ cd my-project
 npx github:yuhao-arcinc/dev-pipeline init
 ```
 
-It will prompt for your stack, test command, and lint command (or pass them as
-flags). Then start work with your agent:
+No questions asked: the stack, test command, and lint command are left as
+auto-detect markers that the agent fills in on first run by analyzing the repo
+(you can still prefill them with flags if you want). Then start work with your agent:
 
 - **codex / any agent**: it follows `AGENTS.md` automatically.
 - **Cursor**: run `/pipeline add a CSV export button to the settings page`.
@@ -65,18 +66,17 @@ flags). Then start work with your agent:
 
 ```
 --dir <path>        Target project directory (default: cwd)
---stack <text>      Prefill project stack
---test-cmd <text>   Prefill test command
---lint-cmd <text>   Prefill lint/typecheck command
---yes               Non-interactive; use flags/placeholders only
+--stack <text>      Prefill project stack (optional; default: auto-detect)
+--test-cmd <text>   Prefill test command (optional; default: auto-detect)
+--lint-cmd <text>   Prefill lint/typecheck command (optional; default: auto-detect)
 --force             Overwrite existing project-context.mdc and AGENTS.md
 ```
 
-Example, non-interactive:
+Example with prefilled values (skips auto-detection for those fields):
 
 ```bash
 npx github:yuhao-arcinc/dev-pipeline init \
-  --yes --stack "TypeScript + React" --test-cmd "npm test" --lint-cmd "npm run lint"
+  --stack "TypeScript + React" --test-cmd "npm test" --lint-cmd "npm run lint"
 ```
 
 ## Customizing per project

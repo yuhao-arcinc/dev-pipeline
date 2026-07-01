@@ -26,6 +26,12 @@ The only exit condition is the user's explicit "done". The four 🚩 gates are H
 STOPS: do not proceed past a gate without the user's explicit approval, and never
 decide on your own that you have "asked enough" — that authority belongs to the user.
 
+**Before starting**, determine the project's stack, test command, and lint/typecheck
+command by reading the repo yourself (build files, scripts, lockfiles — package.json,
+Makefile, pyproject.toml, go.mod, Cargo.toml, CI config). Do not ask the user for
+anything you can infer. If `.cursor/rules/project-context.mdc` exists, read it first
+and fill in any "(auto-detect ...)" fields from the repo, confirming once with the user.
+
 1. **Requirements interrogation** — clarify until there are no hidden assumptions:
    - Explore the repo first; anything you can find yourself, don't ask.
    - Maintain and show a **context ledger** each turn, covering: goal, users &

@@ -10,9 +10,6 @@ import {
   readFileSync,
   writeFileSync,
 } from "node:fs";
-import { createInterface } from "node:readline/promises";
-import { stdin, stdout } from "node:process";
-
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");
 const SRC = {
@@ -53,13 +50,7 @@ function parseArgs(argv) {
   return { positional, flags };
 }
 
-async function ask(rl, question, def) {
-  const suffix = def ? ` (${def})` : "";
-  const answer = (await rl.question(`${question}${suffix}: `)).trim();
-  return answer || def || "";
-}
-
-async function init(flags) {
+function init(flags) {
   const target = flags.dir ? String(flags.dir) : process.cwd();
   const cursorDir = join(target, ".cursor");
   const force = Boolean(flags.force);
@@ -82,22 +73,12 @@ async function init(flags) {
   if (existsSync(pcPath) && !force) {
     console.log("  • .cursor/rules/project-context.mdc (exists, kept)");
   } else {
-    const interactive = !flags.yes && stdin.isTTY;
-    const rl = interactive
-      ? createInterface({ input: stdin, output: stdout })
-      : null;
-    const stack = flags.stack ?? (rl ? await ask(rl, "Tech stack", "") : "");
-    const testCmd =
-      flags["test-cmd"] ?? (rl ? await ask(rl, "Test command", "") : "");
-    const lintCmd =
-      flags["lint-cmd"] ??
-      (rl ? await ask(rl, "Lint/typecheck command", "") : "");
-    if (rl) rl.close();
+    const auto = "(auto-detect — the agent fills this in from the repo on first run)";
     let tpl = readFileSync(join(SRC.templates, "project-context.mdc"), "utf8");
     tpl = tpl
-      .replaceAll("{{STACK}}", String(stack) || "<fill in>")
-      .replaceAll("{{TEST_CMD}}", String(testCmd) || "<fill in>")
-      .replaceAll("{{LINT_CMD}}", String(lintCmd) || "<fill in>");
+      .replaceAll("{{STACK}}", flags.stack ? String(flags.stack) : auto)
+      .replaceAll("{{TEST_CMD}}", flags["test-cmd"] ? String(flags["test-cmd"]) : auto)
+      .replaceAll("{{LINT_CMD}}", flags["lint-cmd"] ? String(flags["lint-cmd"]) : auto);
     writeFileSync(pcPath, tpl);
     console.log("  • .cursor/rules/project-context.mdc");
   }
@@ -123,12 +104,14 @@ function usage() {
       "Usage:",
       "  npx github:yuhao-arcinc/dev-pipeline init [options]",
       "",
+      "By default, stack/test/lint are left as auto-detect markers for the agent",
+      "to infer from the repo on first run. The flags below only prefill them.",
+      "",
       "Options:",
       "  --dir <path>        Target project directory (default: cwd)",
-      "  --stack <text>      Prefill project stack",
-      "  --test-cmd <text>   Prefill test command",
-      "  --lint-cmd <text>   Prefill lint/typecheck command",
-      "  --yes               Non-interactive; use flags/placeholders only",
+      "  --stack <text>      Prefill project stack (optional)",
+      "  --test-cmd <text>   Prefill test command (optional)",
+      "  --lint-cmd <text>   Prefill lint/typecheck command (optional)",
       "  --force             Overwrite existing project-context.mdc and AGENTS.md",
     ].join("\n"),
   );
@@ -138,7 +121,7 @@ const { positional, flags } = parseArgs(process.argv.slice(2));
 const cmd = positional[0] ?? "init";
 
 if (cmd === "init") {
-  await init(flags);
+  init(flags);
 } else if (cmd === "help" || flags.help) {
   usage();
 } else {
