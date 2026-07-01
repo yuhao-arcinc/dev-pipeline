@@ -85,6 +85,40 @@ Edit `.cursor/rules/project-context.mdc` to set the test/lint commands, project
 conventions, and any pipeline overrides (e.g. skip a review step). Both `AGENTS.md`
 and the Cursor skill treat this as project-specific configuration.
 
+## Updating
+
+To pull the latest kit into a project, just re-run it:
+
+```bash
+npx github:yuhao-arcinc/dev-pipeline update   # `init` does the same thing
+```
+
+What happens on update:
+
+- **Refreshed** (managed): `.cursor/skills/`, `.cursor/commands/`,
+  `.cursor/rules/universal-principles.mdc`, and the managed block in `AGENTS.md`
+  (between the `<!-- dev-pipeline:start -->` / `<!-- dev-pipeline:end -->` markers).
+- **Preserved**: `.cursor/rules/project-context.mdc` and anything you added to
+  `AGENTS.md` outside the managed block.
+
+Don't edit the managed files or the AGENTS.md managed block — your changes there get
+overwritten on update. Put project-specific tweaks in `project-context.mdc` instead.
+
+### Getting the newest version
+
+`npx` re-resolves the Git ref on each run, so plain `update` tracks the default
+branch. For reproducibility, tag releases and pin to a tag:
+
+```bash
+# maintainer, per release: bump "version" in package.json, then
+git tag v0.1.0 && git push --tags
+
+# users pin a specific release
+npx github:yuhao-arcinc/dev-pipeline#v0.1.0 init
+```
+
+If a cached npx run seems stale, clear it with `rm -rf ~/.npm/_npx` and re-run.
+
 ## License
 
 MIT

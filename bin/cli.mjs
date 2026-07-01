@@ -18,6 +18,12 @@ const SRC = {
   rules: join(ROOT, "rules"),
   templates: join(ROOT, "templates"),
 };
+const VERSION = JSON.parse(
+  readFileSync(join(ROOT, "package.json"), "utf8"),
+).version;
+
+const AGENTS_START = "<!-- dev-pipeline:start -->";
+const AGENTS_END = "<!-- dev-pipeline:end -->";
 
 function copyDir(src, dest) {
   mkdirSync(dest, { recursive: true });
@@ -27,6 +33,29 @@ function copyDir(src, dest) {
     if (statSync(s).isDirectory()) copyDir(s, d);
     else copyFileSync(s, d);
   }
+}
+
+// Write/refresh the managed dev-pipeline block in AGENTS.md, preserving any
+// content the user has outside the markers. Returns "created" | "updated" | "merged".
+function upsertAgents(target) {
+  const agentsPath = join(target, "AGENTS.md");
+  const body = readFileSync(join(SRC.templates, "AGENTS.md"), "utf8").trimEnd();
+  const stamp = `${AGENTS_START} (v${VERSION} — managed, do not edit inside this block)`;
+  const managed = `${stamp}\n\n${body}\n\n${AGENTS_END}\n`;
+
+  if (!existsSync(agentsPath)) {
+    writeFileSync(agentsPath, managed);
+    return "created";
+  }
+  const current = readFileSync(agentsPath, "utf8");
+  const blockRe = /<!-- dev-pipeline:start[\s\S]*?<!-- dev-pipeline:end -->\n?/;
+  if (blockRe.test(current)) {
+    writeFileSync(agentsPath, current.replace(blockRe, managed));
+    return "updated";
+  }
+  const sep = current.endsWith("\n") ? "\n" : "\n\n";
+  writeFileSync(agentsPath, current + sep + managed);
+  return "merged";
 }
 
 function parseArgs(argv) {
@@ -54,7 +83,7 @@ function init(flags) {
   const target = flags.dir ? String(flags.dir) : process.cwd();
   const cursorDir = join(target, ".cursor");
   const force = Boolean(flags.force);
-  console.log(`\ndev-pipeline: setting up in ${target}\n`);
+  console.log(`\ndev-pipeline v${VERSION}: setting up in ${target}\n`);
 
   copyDir(SRC.skills, join(cursorDir, "skills"));
   console.log("  • .cursor/skills/  (requirements-interrogation, dev-pipeline)");
@@ -83,13 +112,8 @@ function init(flags) {
     console.log("  • .cursor/rules/project-context.mdc");
   }
 
-  const agentsPath = join(target, "AGENTS.md");
-  if (existsSync(agentsPath) && !force) {
-    console.log("  • AGENTS.md (exists, kept)");
-  } else {
-    copyFileSync(join(SRC.templates, "AGENTS.md"), agentsPath);
-    console.log("  • AGENTS.md");
-  }
+  const agentsResult = upsertAgents(target);
+  console.log(`  • AGENTS.md (managed block ${agentsResult})`);
 
   console.log("\nDone. Start the pipeline with any agent:");
   console.log("  • codex / any agent: it follows AGENTS.md automatically.");
@@ -99,10 +123,15 @@ function init(flags) {
 function usage() {
   console.log(
     [
-      "dev-pipeline — set up a gated, tool-agnostic dev workflow in a project",
+      `dev-pipeline v${VERSION} — set up a gated, tool-agnostic dev workflow in a project`,
       "",
       "Usage:",
-      "  npx github:yuhao-arcinc/dev-pipeline init [options]",
+      "  npx github:yuhao-arcinc/dev-pipeline init [options]     # first-time setup",
+      "  npx github:yuhao-arcinc/dev-pipeline update [options]   # pull latest (same as init)",
+      "",
+      "Managed files (skills, commands, universal-principles, and the AGENTS.md",
+      "managed block) are refreshed every run. Your project-context.mdc and anything",
+      "you added to AGENTS.md outside the managed block are preserved.",
       "",
       "By default, stack/test/lint are left as auto-detect markers for the agent",
       "to infer from the repo on first run. The flags below only prefill them.",
@@ -112,7 +141,7 @@ function usage() {
       "  --stack <text>      Prefill project stack (optional)",
       "  --test-cmd <text>   Prefill test command (optional)",
       "  --lint-cmd <text>   Prefill lint/typecheck command (optional)",
-      "  --force             Overwrite existing project-context.mdc and AGENTS.md",
+      "  --force             Also overwrite project-context.mdc (loses your customizations)",
     ].join("\n"),
   );
 }
@@ -120,7 +149,7 @@ function usage() {
 const { positional, flags } = parseArgs(process.argv.slice(2));
 const cmd = positional[0] ?? "init";
 
-if (cmd === "init") {
+if (cmd === "init" || cmd === "update") {
   init(flags);
 } else if (cmd === "help" || flags.help) {
   usage();
