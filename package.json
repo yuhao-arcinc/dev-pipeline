@@ -1,0 +1,20 @@
+{
+  "name": "dev-pipeline",
+  "version": "0.1.0",
+  "description": "A reusable, gated dev workflow (requirements interrogation, design, implement, test, review) for any AI coding agent. Tool-agnostic: works with codex via AGENTS.md and with Cursor via skills/commands. One npx command sets it up in any project.",
+  "type": "module",
+  "bin": {
+    "dev-pipeline": "bin/cli.mjs"
+  },
+  "files": [
+    "bin",
+    "skills",
+    "commands",
+    "rules",
+    "templates"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

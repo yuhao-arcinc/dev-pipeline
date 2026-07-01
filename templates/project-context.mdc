@@ -1,0 +1,12 @@
+---
+description: Project-specific stack and dev-pipeline customization
+alwaysApply: true
+---
+
+# Project Context
+
+- **Stack**: {{STACK}}
+- **Test command**: {{TEST_CMD}}
+- **Lint / typecheck**: {{LINT_CMD}}
+- **Project conventions**: <fill in project-specific rules, e.g. all API calls go through src/api; errors use AppError>
+- **Pipeline overrides**: <e.g. skip Security Review, only run Bugbot; or "none">

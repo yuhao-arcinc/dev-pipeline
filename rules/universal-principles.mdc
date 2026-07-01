@@ -1,0 +1,27 @@
+---
+description: Universal engineering principles that apply to every language and project
+alwaysApply: true
+---
+
+# Universal Engineering Principles
+
+- **DRY**: Remove duplicated logic, but follow the rule of three — abstract on the
+  third occurrence, not the first. Avoid premature abstraction.
+- **YAGNI**: Build only what the current, explicit requirement needs. No speculative features.
+- **Single responsibility**: A function/module does one thing. Split it when it grows
+  or mixes abstraction levels.
+- **Names are documentation**: Use complete, intention-revealing names. No cryptic abbreviations.
+- **Explicit error handling**: Never swallow errors or catch-and-ignore. Handle failure
+  paths or propagate them with context.
+- **Leave no garbage**: No dead code, commented-out code, or stray debug prints in committed work.
+- **Comments explain "why", not "what"**: The code shows what; comments capture intent,
+  trade-offs, and constraints.
+- **Edit over duplicate**: Modify existing code instead of copy-pasting a variant.
+- **Tests are mandatory**: New or changed logic ships with tests.
+- **Understand before changing**: Read existing conventions and follow them.
+- **Edge cases first**: Consider null/empty, concurrency, timeouts, and bounds before the happy path.
+- **Clarify before building**: Before new features or behavior changes, interrogate the
+  requirements — one question at a time — and list every assumption for confirmation. Do
+  not write design, plan, or code until the user explicitly says to start. When unsure
+  whether you have enough context, you don't — keep asking. The authority to decide
+  "enough" belongs to the user.
